@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# if the head is defined by TP, ignore the head, then do tar ..
+# be careful about block size and prefix hex number.
+ipkgtar() {
+	local pkg=$1
+	local pathname=$2
+
+	local headblk=0
+	local blksize=256
+	local prefix=$(hexdump -n 4 -e'1/4 "%08x"' $pkg)
+	[ "$prefix" = "01000000" ] && headblk=1
+	dd if=$pkg ibs=$blksize skip=$headblk | tar -xzO $pathname
+}
+
+ipkgtar $@
